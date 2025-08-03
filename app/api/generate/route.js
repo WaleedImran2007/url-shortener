@@ -17,51 +17,40 @@
 //         url: body.url,
 //         shorturl: body.shorturl,
 //     })
-    
+
 
 //   return Response.json({ success: true, error: false ,message: 'URL generated successfully' })
 // }
 
-import clientPromise from "@/lib/mongodb";
+import clientPromise from "@/lib/mongodb"
 
 export async function POST(request) {
-  try {
-    const body = await request.json();
+    try {
+        const body = await request.json()
+        console.log("Received body:", body)
+        const client = await clientPromise
+        const db = client.db("bitlinks")
+        const collection = db.collection("url")
 
-    if (!body.url || !body.shorturl) {
-      return Response.json(
-        { success: false, error: true, message: "Missing URL or shorturl" },
-        { status: 400 }
-      );
+        // Check if short url already exists
+        const doc = await collection.findOne({ shorturl: body.shorturl })
+        if (doc) {
+            return Response.json({ success: false, error: true, message: 'Short URL already exists' })
+        }
+
+        // Insert new short url
+        await collection.insertOne({
+            url: body.url,
+            shorturl: body.shorturl,
+        })
+
+        return Response.json({ success: true, error: false, message: 'URL generated successfully' })
+    } catch (error) {
+        console.error("API Error:", error)
+        return Response.json(
+            { success: false, error: true, message: 'Internal Server Error' },
+            { status: 500 }
+        )
     }
-
-    const client = await clientPromise;
-    const db = client.db("bitlinks");
-    const collection = db.collection("url");
-
-    // Check if short URL already exists
-    const doc = await collection.findOne({ shorturl: body.shorturl });
-    if (doc) {
-      return Response.json({
-        success: false,
-        error: true,
-        message: "Short URL already exists",
-      });
-    }
-
-    // Insert new URL mapping
-    await collection.insertOne({
-      url: body.url,
-      shorturl: body.shorturl,
-    });
-
-    return Response.json({
-      success: true,
-      error: false,
-      message: "URL generated successfully",
-    });
-  } catch (err) {
-    console.error("API Error:", err);
-    return new Response("Internal Server Error", { status: 500 });
-  }
 }
+
