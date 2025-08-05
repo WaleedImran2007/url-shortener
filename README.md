@@ -7,7 +7,7 @@ Users can paste long URLs and get a shortened version that redirects instantly.
 
 ## 🌐 Live Preview
 
-👉 [Visit Live Site](https://url-shortener-gray-pi.vercel.app/)
+👉 [Visit Live Site](https://url-shortener-iota-bice.vercel.app/)
 
 ---
 
